@@ -50,12 +50,41 @@ with DAG(
 
 
 
-    # step 3: transform the data (extract relevant fields) 
-
+    # step 3: transform the data (extract relevant fields)
+    @task
+    def transform_apod_data(response):
+        apod_data={
+            'title': response.get('title' , ''),
+            'explanation': response.get('explanation', ''),
+            'url': response.get('url', ''),
+            'date': response.get('date', ''),
+            'media_type': response.get('media_type', '')
+        }
+        return apod_data
 
     # step 4: Load the data into Postgres SQL database
+    @task
+    def load_data_to_postgres(apod_data):
+        #initialize the postgres hook
+        pg_hook = PostgresHook(postgres_conn_id='postgres_connection')
 
-    # step 5: Verify the db in DBView 
+        #SQL query to insert data
+        insert_query = """
+        INSERT INTO nasa_apod_data (title, explanation, url, date, media_type)
+        VALUES (%s, %s, %s, %s, %s);
+        """
+
+        #Execute the insert query
+        pg_hook.run(insert_query, parameters=(
+            apod_data['title'],
+            apod_data['explanation'],
+            apod_data['url'],
+            apod_data['date'],
+            apod_data['media_type']
+        ))
+
+    # step 5: Verify the db in DBViewer
+    
 
     # step 6: Define task dependencies 
 
