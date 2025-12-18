@@ -15,6 +15,25 @@ with DAG(
 ) as dag:
     
     # step 1: Create the table if it doesn't exist
+    @task
+    def create_table():
+        #Initialize the postgres hook
+        pg_hook = PostgresHook(postgres_conn_id='postgres_connection')
+
+        #SQL query to create the table
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS nasa_apod_data(
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255),
+            explanation TEXT,
+            url TEXT,
+            date DATE,
+            media_type VARCHAR(50)
+        );
+        """
+
+        # Execute the query
+        pg_hook.run(create_table_query)
 
 
 
