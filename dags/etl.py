@@ -37,7 +37,17 @@ with DAG(
 
 
 
-    # step 2: Fetch data from NASA APOD(Astronomy Image of the Day) API
+    # step 2: Fetch data from NASA APOD(Astronomy Picture of the Day) API
+    #sample API endpoint: https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY
+    extract_apod = SimpleHttpOperator(
+        task_id='extract_apod',
+        http_conn_id='nasa_api', #Connection ID in Airflow
+        endpoint='planetary/apod', # Nasa APOD endpoint
+        method='GET',
+        data={"api_key": "{{conn.nasa_api.extra_dejson.api_key}}"}, # Using API key from connection
+        response_filter=lambda response: response.json(), # Parse the response as JSON
+    )
+
 
 
     # step 3: transform the data (extract relevant fields) 
